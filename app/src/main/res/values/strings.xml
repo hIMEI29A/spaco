@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SpaCo</string>
+    <string name="reminder_channel_name">Review reminders</string>
+    <string name="reminder_channel_description">Reminds you when practice items are due.</string>
+    <string name="reminder_title">Time to practice</string>
+    <plurals name="reminder_due">
+        <item quantity="one">%d item is due for practice.</item>
+        <item quantity="other">%d items are due for practice.</item>
+    </plurals>
+</resources>
