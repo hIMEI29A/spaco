@@ -21,8 +21,8 @@
 
 ## 4. Composition and wiring
 
-- [ ] 4.1 Add `FailoverCoachAgent(primary, secondary)`: answers with the primary, falls back to the secondary only when the primary returns `null`. Verify with `FailoverCoachAgentTest` — primary answer wins and the fallback is not called, primary `null` yields the fallback's answer, sibling requests including `null` from both — plus a test that a `CancellationException` from the primary still propagates.
-- [ ] 4.2 Rewire `CoachModule.provideCoachAgent()` to `TimeoutCoachAgent(FailoverCoachAgent(LlmCoachAgent(...), DeterministicCoachAgent()), timeout = 8 s)`, built from `LlmCoachConfig.from(BuildConfig...)`, falling back to the deterministic coach alone when the config is `null`; keep the timeout constants in one place with a comment explaining the relationship between the adapter and outer bounds (design D6). Verify with `./gradlew test` (existing `TimeoutCoachAgentTest` and coach tests still pass) and by confirming with a debug build plus a key set in `local.properties` that the app starts and serves sessions.
+- [x] 4.1 Add `FailoverCoachAgent(primary, secondary)`: answers with the primary, falls back to the secondary only when the primary returns `null`. Verify with `FailoverCoachAgentTest` — primary answer wins and the fallback is not called, primary `null` yields the fallback's answer, sibling requests including `null` from both — plus a test that a `CancellationException` from the primary still propagates.
+- [x] 4.2 Rewire `CoachModule.provideCoachAgent()` to `TimeoutCoachAgent(FailoverCoachAgent(LlmCoachAgent(...), DeterministicCoachAgent()), timeout = 8 s)`, built from `LlmCoachConfig.from(BuildConfig...)`, falling back to the deterministic coach alone when the config is `null`; keep the timeout constants in one place with a comment explaining the relationship between the adapter and outer bounds (design D6). Verify with `./gradlew test` (existing `TimeoutCoachAgentTest` and coach tests still pass) and by confirming with a debug build plus a key set in `local.properties` that the app starts and serves sessions.
 
 ## 5. Feedback no longer waits for the explanation
 
