@@ -44,6 +44,9 @@ android {
 
     buildFeatures {
         compose = true
+        // BuildConfig carries the coach's endpoint, model and credential, which
+        // are supplied per-machine through local.properties (never committed).
+        buildConfig = true
     }
 
     testOptions {
@@ -88,6 +91,7 @@ dependencies {
     ksp(libs.androidx.hilt.compiler)
 
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.serialization.json)
 
     testImplementation(libs.junit)
     testImplementation(libs.truth)

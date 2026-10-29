@@ -2,8 +2,8 @@
 
 ## 1. Transport and serialization toolchain
 
-- [ ] 1.1 Add `kotlinx-serialization-json` to `gradle/libs.versions.toml` and to `app/build.gradle.kts` as a runtime dependency (no serialization compiler plugin: the adapter uses the `JsonElement` API only; verify the chosen version resolves from the local Gradle cache with `./gradlew --offline :app:dependencies --configuration debugRuntimeClasspath`). Verify with `./gradlew :app:assembleDebug` and `./gradlew test lint` — the existing suite must stay green with no new lint errors.
-- [ ] 1.2 Enable `buildConfig = true` in `app/build.gradle.kts` (explicitly, with a comment on why) and verify the generated `app/build/generated/source/buildConfig/debug/com/spaco/app/BuildConfig.java` appears after `./gradlew :app:assembleDebug`.
+- [x] 1.1 Add `kotlinx-serialization-json` to `gradle/libs.versions.toml` and to `app/build.gradle.kts` as a runtime dependency (no serialization compiler plugin: the adapter uses the `JsonElement` API only; verify the chosen version resolves from the local Gradle cache with `./gradlew --offline :app:dependencies --configuration debugRuntimeClasspath`). Verify with `./gradlew :app:assembleDebug` and `./gradlew test lint` — the existing suite must stay green with no new lint errors.
+- [x] 1.2 Enable `buildConfig = true` in `app/build.gradle.kts` (explicitly, with a comment on why) and verify the generated `app/build/generated/source/buildConfig/debug/com/spaco/app/BuildConfig.java` appears after `./gradlew :app:assembleDebug`.
 
 ## 2. Build-time configuration and network permission
 
