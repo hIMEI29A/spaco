@@ -32,7 +32,7 @@
 ## 6. Integration verification
 
 - [x] 6.1 Run `./gradlew test lint` and confirm the full suite passes and lint reports no new errors beyond the pre-existing `OldTargetApi` and `MissingApplicationIcon` warnings.
-- [ ] 6.2 Run `./gradlew :app:connectedDebugAndroidTest` on the API 36 AVD with an **unconfigured** build and confirm the instrumented tests pass — this is the offline guarantee: with no keys the app makes no request and sessions behave as before.
+- [x] 6.2 Run `./gradlew :app:connectedDebugAndroidTest` on the API 36 AVD with an **unconfigured** build and confirm the instrumented tests pass — this is the offline guarantee: with no keys the app makes no request and sessions behave as before.
 - [ ] 6.3 Manual offline check on the AVD with an unconfigured build: run a session in airplane mode and confirm the exercise, grading, and explanation still appear with no perceptible wait.
 - [ ] 6.4 Optional manual smoke check with a configured build against the endpoint in `local.properties`: run one session and confirm a remotely generated exercise is presented, is attributable to the item it was generated for, and that the item's stored content is unchanged afterwards.
 
