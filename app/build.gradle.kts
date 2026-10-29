@@ -1,9 +1,32 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
 }
+
+/**
+ * Per-machine coach configuration, read from `local.properties` (gitignored, and
+ * absent in a fresh checkout). Keys: LLM_BASE_URL, LLM_MODEL, LLM_API_KEY.
+ *
+ * All three default to an empty string, and the app treats a partially filled
+ * set as "no remote coach" — so an unconfigured build behaves exactly like the
+ * offline one, and a checkout without this file still builds.
+ */
+val coachConfiguration: Map<String, String> = run {
+    val file = rootProject.file("local.properties")
+    val properties = Properties().apply {
+        if (file.exists()) file.inputStream().use { load(it) }
+    }
+    listOf("LLM_BASE_URL", "LLM_MODEL", "LLM_API_KEY").associateWith { name ->
+        properties.getProperty(name).orEmpty()
+    }
+}
+
+fun String.asBuildConfigString(): String =
+    "\"" + replace("\\", "\\\\").replace("\"", "\\\"") + "\""
 
 android {
     namespace = "com.spaco.app"
@@ -25,6 +48,11 @@ android {
         versionCode = 2
         versionName = "0.1.1-alpha"
         testInstrumentationRunner = "com.spaco.app.HiltTestRunner"
+
+        // Empty when local.properties does not configure a remote coach.
+        buildConfigField("String", "LLM_BASE_URL", coachConfiguration.getValue("LLM_BASE_URL").asBuildConfigString())
+        buildConfigField("String", "LLM_MODEL", coachConfiguration.getValue("LLM_MODEL").asBuildConfigString())
+        buildConfigField("String", "LLM_API_KEY", coachConfiguration.getValue("LLM_API_KEY").asBuildConfigString())
     }
 
     buildTypes {

@@ -3,6 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!--
+        Only used by the remote coach, and only when local.properties configures
+        one: an unconfigured build makes no network request at all.
+    -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".SpaCoApplication"
