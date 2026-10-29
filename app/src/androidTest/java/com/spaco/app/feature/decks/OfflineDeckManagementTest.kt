@@ -1,17 +1,14 @@
 package com.spaco.app.feature.decks
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.printToString
 import androidx.test.platform.app.InstrumentationRegistry
 import com.spaco.app.MainActivity
 import com.spaco.app.core.data.db.SpaCoDatabase
@@ -145,24 +142,14 @@ class OfflineDeckManagementTest {
     }
 
     private fun awaitText(text: String) {
-        try {
-            composeRule.waitUntil(timeoutMillis = TIMEOUT) {
-                composeRule.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
-            }
-        } catch (failure: ComposeTimeoutException) {
-            dumpTree("text '$text'")
-            throw failure
+        composeRule.waitUntil(timeoutMillis = TIMEOUT) {
+            composeRule.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
         }
     }
 
     private fun awaitTag(tag: String) {
-        try {
-            composeRule.waitUntil(timeoutMillis = TIMEOUT) {
-                composeRule.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty()
-            }
-        } catch (failure: ComposeTimeoutException) {
-            dumpTree("tag '$tag'")
-            throw failure
+        composeRule.waitUntil(timeoutMillis = TIMEOUT) {
+            composeRule.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty()
         }
     }
 
@@ -177,12 +164,6 @@ class OfflineDeckManagementTest {
         InstrumentationRegistry.getInstrumentation().uiAutomation
             .executeShellCommand(command)
             .close()
-    }
-
-    private fun dumpTree(expected: String) {
-        println("SPACO_DUMP_BEGIN expected $expected")
-        println(composeRule.onRoot().printToString(maxDepth = 20))
-        println("SPACO_DUMP_END")
     }
 
     private companion object {

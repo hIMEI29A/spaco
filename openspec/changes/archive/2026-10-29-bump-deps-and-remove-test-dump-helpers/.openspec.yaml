@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-10-29
+# No capability behavior changes: dependency refresh and test-scaffolding removal only.
+skip_specs: true
