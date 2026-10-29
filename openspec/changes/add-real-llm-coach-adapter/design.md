@@ -45,11 +45,13 @@ Three fields — `LLM_BASE_URL`, `LLM_MODEL`, `LLM_API_KEY` — are read from `l
 
 Alternatives considered: in-app entry stored in DataStore (rejected by the user; also puts the key in an ordinary app file with no encryption); `~/.gradle/gradle.properties` (a second config location with no advantage over the file AGP already reads); an environment variable (Android Studio builds would not see it). The cost is that the key is compiled into the APK — acceptable because this is a local/debug workflow, and documented as such.
 
-### D3. OkHttp + kotlinx.serialization for transport and JSON
+### D3. JDK `HttpURLConnection` + kotlinx-serialization-json (JsonElement, no codegen)
 
-`okhttp` and the serialization compiler plugin (version tracking `kotlin`, i.e. `2.4.21`) go into `libs.versions.toml`; DTOs are `@Serializable`. Tests use `mockwebserver` at the same version, running in `app/src/test` on the JVM.
+Transport is `java.net.HttpURLConnection` — it is part of the platform, needs no dependency, and Android supports it. JSON is parsed with `kotlinx-serialization-json`'s `JsonElement` API (`parseToJsonElement`, `buildJsonObject`), which needs the runtime library only: the `@Serializable` compiler plugin is deliberately not applied, because codegen adds nothing for four flat objects and one of them is built from scratch. Tests run the adapter against an in-process `com.sun.net.httpserver.HttpServer` on the JVM, which gives a real request/response round trip with assertable request bodies.
 
-Alternatives: Ktor client (an engine plus more transitive surface for one endpoint); `HttpURLConnection` + `org.json` (no new dependencies, but hand-rolled serialization and a weaker seam for asserting request bodies); Retrofit (a codegen stack for a single call). The chosen pair is the smallest set that gives a real request-shape assertion in tests.
+Revised after the original plan: the first draft chose OkHttp with MockWebServer and the serialization compiler plugin. Maven Central is unreachable from this environment and none of those three artifacts is in the local Gradle cache, so that plan could not be built. The substitution keeps the design's properties — a real transport, a real request-shape assertion, no hand-rolled string parsing — and drops the dependency count instead of raising it.
+
+Alternatives: `org.json` (Android's copy only works un-mocked under Robolectric, so adapter tests would pay that cost); hand-rolled string parsing (fragile against escaping); Ktor client and Retrofit (an engine or a codegen stack for one endpoint, and both are unreachable here).
 
 ### D4. One request shape: chat completions with a strict-JSON instruction
 
@@ -85,7 +87,7 @@ The payload contains the target item's prompt and expected answer, sibling answe
 - [No test exercises a real provider, so response-format drift is invisible] → defensive parsing, required identity echo, and the deterministic fallback keep the app working; a manual smoke check against the configured endpoint is documented as optional, not part of the suite.
 - [Latency: up to the bound per coach request, and the session budget is 10 items] → bounded waits, immediate grading feedback (D7), and the fallback path; caching and quotas are explicitly out of scope.
 - [Prompt injection through item content] → strict output shape, required identity, no tool access, and `CoachOutputValidator` at the call site; the worst case is a discarded response.
-- [New dependencies against a pinned toolchain (AGP 9, forced KGP 2.4.21)] → add the dependencies and the serialization plugin first and run `:app:assembleDebug` plus `./gradlew test lint` before writing adapter code, so a resolution or plugin incompatibility surfaces on its own.
+- [New dependencies against a pinned toolchain (AGP 9, forced KGP 2.4.21)] → add the serialization runtime first and run `:app:assembleDebug` plus `./gradlew test lint` before writing adapter code, so a resolution or metadata incompatibility surfaces on its own.
 - [Determinism is lost for remotely served requests (D5: the seed is not sent)] → tests use a fake transport and assert mapping, validation, and failure paths, never model output; the deterministic coach remains the reproducibility story.
 - [A half-configured file could send content without a key, or with the wrong endpoint] → D2's all-or-nothing rule, plus the unconfigured build making no request at all.
 

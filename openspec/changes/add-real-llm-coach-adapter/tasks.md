@@ -2,7 +2,7 @@
 
 ## 1. Transport and serialization toolchain
 
-- [ ] 1.1 Add `okhttp`, `okhttp-mockwebserver`, and the `kotlinx-serialization` compiler plugin to `gradle/libs.versions.toml`, and apply the plugin with `implementation`/`testImplementation` entries in `app/build.gradle.kts` (serialization plugin version tracks `kotlin = "2.4.21"`; verify the resolved versions exist in the repositories rather than guessing coordinates). Verify with `./gradlew :app:assembleDebug` and `./gradlew test lint` — the existing suite must stay green with no new lint errors.
+- [ ] 1.1 Add `kotlinx-serialization-json` to `gradle/libs.versions.toml` and to `app/build.gradle.kts` as a runtime dependency (no serialization compiler plugin: the adapter uses the `JsonElement` API only; verify the chosen version resolves from the local Gradle cache with `./gradlew --offline :app:dependencies --configuration debugRuntimeClasspath`). Verify with `./gradlew :app:assembleDebug` and `./gradlew test lint` — the existing suite must stay green with no new lint errors.
 - [ ] 1.2 Enable `buildConfig = true` in `app/build.gradle.kts` (explicitly, with a comment on why) and verify the generated `app/build/generated/source/buildConfig/debug/com/spaco/app/BuildConfig.java` appears after `./gradlew :app:assembleDebug`.
 
 ## 2. Build-time configuration and network permission
@@ -15,7 +15,7 @@
 ## 3. The LLM coach implementation
 
 - [ ] 3.1 Add the OpenAI-compatible request/response DTOs and the JSON extraction that tolerates a fenced or prose-wrapped body (design D4). Verify with unit tests for extraction: clean object, code-fenced object, prose around the object, and no object at all (→ `null`).
-- [ ] 3.2 Implement `LlmCoachAgent`: a `CoachAgent` sending `POST {baseUrl}/v1/chat/completions` with a per-operation system prompt demanding a single JSON object, `temperature: 0`, the bearer credential, and the adapter's own bounds (connect 3 s, read 5 s, 6 s overall, per design D6); map each response to the port's types, requiring the echoed item identity. Verify with `LlmCoachAgentTest` on `MockWebServer` covering all three operations, a non-2xx status, a malformed body, a missing identity, a mismatched identity, and a response that arrives after the bound — each unusable case returning `null` and none throwing.
+- [ ] 3.2 Implement `LlmCoachAgent`: a `CoachAgent` sending `POST {baseUrl}/v1/chat/completions` over `HttpURLConnection` with a per-operation system prompt demanding a single JSON object, `temperature: 0`, the bearer credential, and the adapter's own bounds (connect 3 s, read 5 s, 6 s overall, per design D6); map each response to the port's types, requiring the echoed item identity. Verify with `LlmCoachAgentTest` against an in-process JDK `HttpServer` covering all three operations, a non-2xx status, a malformed body, a missing identity, a mismatched identity, and a response that arrives after the bound — each unusable case returning `null` and none throwing.
 - [ ] 3.3 Verify the outgoing payload from the same tests: assert the recorded request body contains the target item's content and the sibling answers, and contains no field the port does not define (design D8), and that the credential travels only in the `Authorization` header.
 - [ ] 3.4 Verify the credential is not echoed in failures: feed an error status and a transport failure through `LlmCoachAgent` and assert the resulting diagnostic text (message and cause chain) does not contain the configured credential.
 
