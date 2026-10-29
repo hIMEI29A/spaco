@@ -37,6 +37,12 @@ build is wired.
 ./gradlew :app:assembleDebug      # build the debug APK
 ```
 
+The APK is written to:
+
+```
+app/build/outputs/apk/debug/app-debug.apk
+```
+
 ## Install and run
 
 ```bash
@@ -49,6 +55,52 @@ Start the emulator first if needed:
 ```bash
 emulator -avd OpenTUI_Pixel_8_API_36 -no-boot-anim -gpu swiftshader_indirect
 ```
+
+## Install on a physical phone
+
+Build the debug APK, copy it to the phone, and open it there (or install it over
+USB). The debug APK is self-contained and does not need the SDK or a network
+connection.
+
+**1. Build the APK**
+
+```bash
+./gradlew :app:assembleDebug
+# -> app/build/outputs/apk/debug/app-debug.apk
+```
+
+**2a. Install over USB (recommended)**
+
+Enable *Developer options → USB debugging* on the phone, connect it, and verify
+the device is visible:
+
+```bash
+adb devices            # your phone should appear as "device"
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
+
+**2b. Install by transferring the file**
+
+If USB debugging is not an option, transfer `app-debug.apk` to the phone
+(USB storage, cloud drive, messenger, etc.), then open it from the phone's Files
+app and confirm the install prompt. Android will ask you to allow installing
+unknown apps for the app you open it from — allow it once, install, then it is
+safe to turn back off.
+
+Requirements on the phone:
+
+- Android 8.0 (API 26) or newer.
+- "Install unknown apps" permitted for the file manager / browser you use to
+  open the APK.
+
+Notes:
+
+- This is a **debug** build, signed with the debug keystore. It is fine for
+  personal sideloading but not for distribution (Play Store or handing to
+  others). A release build would use `./gradlew :app:assembleRelease` with a
+  proper signing config.
+- Since the app is offline and text-only, after installing it works with no
+  network and stores everything on the device.
 
 ## Test
 
