@@ -39,6 +39,27 @@ adb shell am start -n com.spaco.app/.MainActivity
 
 The wrapper downloads Gradle 9.8.2 on first use, so no system Gradle is needed.
 
+### Remote coach configuration
+
+`local.properties` is read for three optional settings, which the build turns
+into `BuildConfig` fields:
+
+```properties
+LLM_BASE_URL=https://api.openai.com   # server root; /v1/chat/completions is appended
+LLM_MODEL=gpt-4o-mini
+LLM_API_KEY=sk-...                    # Authorization bearer value
+```
+
+`local.properties` is gitignored, and a checkout without the file (or with any of
+the three keys missing or blank) builds normally and uses the built-in offline
+coach, making no network request. All three are required together; the app
+compiles the key into the APK, so use this for local debug builds only and never
+publish a release built with it. Confirm what a build actually embedded:
+
+```bash
+grep LLM_ app/build/generated/source/buildConfig/debug/com/spaco/app/BuildConfig.java
+```
+
 ## 4. Emulator
 
 ```bash
