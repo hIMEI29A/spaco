@@ -220,8 +220,9 @@ class SessionViewModel @Inject constructor(
         }
         sessionId?.let { sessionRepository.save(currentSession(SessionStatus.ACTIVE)) }
 
-        val explanation = validatedExplanation(item, grade)
-
+        // Publish the grade before asking the coach to explain it: a remote coach
+        // can take seconds, and the learner must not wait to see whether they were
+        // right.
         _state.update {
             it.copy(
                 grade = grade,
@@ -229,8 +230,24 @@ class SessionViewModel @Inject constructor(
                 submissionError = null,
                 answeredCount = answered.size,
                 correctCount = correctCount,
-                presentedExplanation = explanation ?: item.explanation,
             )
+        }
+
+        // The explanation is resolved outside the session lock, so the learner can
+        // move on immediately; it is merged in only while the same item is still on
+        // screen, so a late answer never overwrites the item that replaced it
+        // (design D7).
+        viewModelScope.launch {
+            val explanation = validatedExplanation(item, grade)
+            mutate {
+                _state.update { current ->
+                    if (current.currentItem?.id != item.id) {
+                        current
+                    } else {
+                        current.copy(presentedExplanation = explanation ?: item.explanation)
+                    }
+                }
+            }
         }
     }
 

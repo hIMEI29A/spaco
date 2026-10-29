@@ -26,8 +26,8 @@
 
 ## 5. Feedback no longer waits for the explanation
 
-- [ ] 5.1 Reorder `SessionViewModel.recordGrade` so the grade and the already-recorded review are published first, then resolve the explanation and merge it into `presentedExplanation` only while the session still shows the same item (design D7); record nothing new before the review event. Verify with updated `SessionViewModelTest`: with a coach whose explanation call suspends, the state exposes `grade` and the recorded review while the call is still pending, the explanation appears once it resolves, and a late explanation is not applied after the learner advances to the next item.
-- [ ] 5.2 Confirm the existing session behavior is otherwise unchanged: `SessionViewModelTest`, `SessionItemSelectorTest`, `SessionScreenTest`, and `CoachOutputValidatorTest` all pass under `./gradlew test`, with no assertion weakened.
+- [x] 5.1 Reorder `SessionViewModel.recordGrade` so the grade and the already-recorded review are published first, then resolve the explanation and merge it into `presentedExplanation` only while the session still shows the same item (design D7); record nothing new before the review event. Verify with updated `SessionViewModelTest`: with a coach whose explanation call suspends, the state exposes `grade` and the recorded review while the call is still pending, the explanation appears once it resolves, and a late explanation is not applied after the learner advances to the next item.
+- [x] 5.2 Confirm the existing session behavior is otherwise unchanged: `SessionViewModelTest`, `SessionItemSelectorTest`, `SessionScreenTest`, and `CoachOutputValidatorTest` all pass under `./gradlew test`, with no assertion weakened.
 
 ## 6. Integration verification
 
