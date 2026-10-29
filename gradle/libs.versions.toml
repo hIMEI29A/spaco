@@ -15,6 +15,7 @@ work = "2.12.0"
 hilt = "2.60.1"
 androidxHilt = "1.4.0"
 coroutines = "1.11.0"
+serializationJson = "1.8.1"
 junit = "4.13.2"
 turbine = "1.2.1"
 robolectric = "4.17"
@@ -60,6 +61,7 @@ androidx-hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", vers
 
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serializationJson" }
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
