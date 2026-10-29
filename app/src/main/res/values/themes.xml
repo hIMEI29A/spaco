@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The activity window theme. All colours and typography live in Compose
+         (Material 3), so this only has to remove the platform action bar. -->
+    <style name="Theme.SpaCo" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
