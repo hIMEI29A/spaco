@@ -16,6 +16,7 @@ import com.spaco.app.core.domain.model.GradedBy
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -291,10 +292,89 @@ class SessionViewModelTest {
         assertThat(scheduler.nextDueChecks).isNotEmpty()
     }
 
+    @Test
+    fun `the grade is published while the explanation is still being written`() =
+        runTest(testDispatcher.scheduler) {
+            val item = addItem(prompt = "stored prompt", answer = "4")
+            val coach = SuspendingExplanationCoach()
+            val vm = viewModel(coach)
+
+            vm.submitAnswer("4")
+
+            assertThat(coach.explanationStarted).isTrue()
+            val pending = vm.uiState.value
+            assertThat(pending.grade).isEqualTo(Grade.CORRECT)
+            assertThat(pending.presentedExplanation).isNull()
+            assertThat(reviews.getForItem(item.id)).hasSize(1)
+
+            coach.explanationText.complete("resolved later")
+        }
+
+    @Test
+    fun `the explanation is merged once the coach resolves it`() =
+        runTest(testDispatcher.scheduler) {
+            addItem(prompt = "stored prompt", answer = "4")
+            val coach = SuspendingExplanationCoach()
+            val vm = viewModel(coach)
+
+            vm.submitAnswer("4")
+            assertThat(vm.uiState.value.presentedExplanation).isNull()
+
+            coach.explanationText.complete("Because four is two plus two.")
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            assertThat(vm.uiState.value.presentedExplanation)
+                .isEqualTo("Because four is two plus two.")
+        }
+
+    @Test
+    fun `a late explanation is not merged after the learner advances`() =
+        runTest(testDispatcher.scheduler) {
+            addItem(prompt = "first", answer = "1")
+            addItem(prompt = "second", answer = "2")
+            val coach = SuspendingExplanationCoach()
+            val vm = viewModel(coach)
+
+            val first = vm.uiState.value.currentItem!!
+            vm.submitAnswer(first.expectedAnswer)
+            assertThat(coach.explanationStarted).isTrue()
+
+            vm.advance()
+            val second = vm.uiState.value.currentItem!!
+            assertThat(second.id).isNotEqualTo(first.id)
+            assertThat(vm.uiState.value.presentedExplanation).isNull()
+
+            coach.explanationText.complete("late explanation for the first item")
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val state = vm.uiState.value
+            assertThat(state.currentItem!!.id).isEqualTo(second.id)
+            assertThat(state.presentedExplanation).isNull()
+        }
+
     private class NullCoachAgent : CoachAgent {
         override suspend fun selectNextItem(request: CoachSelectionRequest): CoachSelection? = null
         override suspend fun generateExercise(request: ExerciseRequest): GeneratedExercise? = null
         override suspend fun generateExplanation(request: ExplanationRequest): GeneratedExplanation? = null
+    }
+
+    /** A coach whose explanation call stays pending until the test resolves it. */
+    private class SuspendingExplanationCoach : CoachAgent {
+        val explanationText = CompletableDeferred<String>()
+        var explanationStarted = false
+            private set
+
+        override suspend fun selectNextItem(request: CoachSelectionRequest): CoachSelection? = null
+
+        override suspend fun generateExercise(request: ExerciseRequest): GeneratedExercise? = null
+
+        override suspend fun generateExplanation(request: ExplanationRequest): GeneratedExplanation {
+            explanationStarted = true
+            return GeneratedExplanation(
+                targetItemId = request.item.id,
+                text = explanationText.await(),
+            )
+        }
     }
 
     private class ThrowingCoachAgent : CoachAgent {

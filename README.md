@@ -99,8 +99,38 @@ Notes:
   personal sideloading but not for distribution (Play Store or handing to
   others). A release build would use `./gradlew :app:assembleRelease` with a
   proper signing config.
-- Since the app is offline and text-only, after installing it works with no
-  network and stores everything on the device.
+- Since the app is offline by default and text-only, after installing it works
+  with no network and stores everything on the device. See *Remote coach* below
+  for the one build-time option that changes that.
+
+## Remote coach (optional)
+
+Practice is served by a built-in offline coach unless three settings are
+present in `local.properties` (never committed, per-machine):
+
+```properties
+LLM_BASE_URL=https://api.openai.com      # server root, not the full path
+LLM_MODEL=gpt-4o-mini
+LLM_API_KEY=sk-...                       # sent as the Authorization bearer value
+```
+
+The app then asks that OpenAI-compatible endpoint (`POST
+{LLM_BASE_URL}/v1/chat/completions`) to choose what to practise, generate an
+exercise, and explain an answer. Behaviour notes:
+
+- Leave all three out (or blank) and nothing changes: the app behaves exactly as
+  it does offline and makes no network request at all. A partially filled set is
+  treated the same way — all three are required.
+- Whenever the endpoint is unreachable, slow, or returns something unusable, the
+  request is answered by the built-in coach and the session continues.
+- Grading feedback is shown before the explanation arrives, so a slow model
+  never delays the verdict.
+- The credential is compiled into the APK, so configure it for local debug
+  builds only and never publish a release built with it. Rotate the key if such
+  an APK leaks.
+- Only the content a request needs leaves the device: the item's prompt and
+  expected answer, sibling answers used as distractors, scheduling state, and
+  recent review outcomes.
 
 ## Test
 
