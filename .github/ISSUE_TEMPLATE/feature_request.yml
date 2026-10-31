@@ -1,8 +1,40 @@
 name: Feature Request
 description: Suggest a new feature or improvement
 title: "[Feature]: "
-labels: ["enhancement", "needs-triage"]
+labels: ["enhancement"]
 body:
+  - type: textarea
+    id: task_number
+    attributes:
+      label: task_number
+      description: Task number from Project Management System
+    validations:
+      required: false
+
+  - type: textarea
+    id: project
+    attributes:
+      label: project
+      description: Project name from Project Management System
+    validations:
+      required: false
+
+  - type: textarea
+    id: is_blocker
+    attributes:
+      label: is_blocker
+      description: Is this issue are blocker for another
+    validations:
+      required: false
+
+  - type: textarea
+    id: blocked_by
+    attributes:
+      label: blocked_by
+      description: Which issue blocks
+    validations:
+      required: false 
+        
   - type: markdown
     attributes:
       value: |
