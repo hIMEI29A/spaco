@@ -3,8 +3,8 @@
 ## 1. Configuration port and credential storage
 
 - [x] 1.1 Add the coach configuration model and its domain port: endpoint, model, optional credential, exposed as the current configuration; verify unit tests cover that an endpoint and a model are both required and that a credential is optional
-- [ ] 1.2 Implement the keystore-backed store: AES-GCM under a non-exportable Android Keystore key, ciphertext in a dedicated private file; verify a round-trip test saves and reads the configuration back through a new store instance, and that the raw stored file does not contain the credential text
-- [ ] 1.3 Implement replace and clear on the store; verify tests show that clearing yields no configuration, that later reads return empty, and that a replaced credential is the one used
+- [x] 1.2 Implement the keystore-backed store: AES-GCM under a non-exportable Android Keystore key, ciphertext in a dedicated private file; verify a round-trip test saves and reads the configuration back through a new store instance, and that the raw stored file does not contain the credential text
+- [x] 1.3 Implement replace and clear on the store; verify tests show that clearing yields no configuration, that later reads return empty, and that a replaced credential is the one used
 
 ## 2. Dynamic composition and removal of the build-time path
 
@@ -28,8 +28,8 @@
 
 ## 5. Integration verification
 
-- [ ] 5.1 Run `./gradlew --offline test lint`; verify BUILD SUCCESSFUL with zero test failures and no new lint errors
-- [ ] 5.2 Run `:app:connectedDebugAndroidTest` on the API 36 AVD with a default install; verify all instrumented tests pass
+- [x] 5.1 Run `./gradlew --offline test lint`; verify BUILD SUCCESSFUL with zero test failures and no new lint errors
+- [x] 5.2 Run `:app:connectedDebugAndroidTest` on the API 36 AVD with a default install; verify all instrumented tests pass
 - [ ] 5.3 Manual end-to-end on the emulator: an unconfigured install completes a session offline without a coaching request; a saved credential-less local endpoint serves a session remotely; clearing the configuration returns to the offline path; verify each observation by hand and record the results
 - [ ] 5.4 Confirm the credential survives an app restart but not a restore onto a clean install: verify a restart keeps the saved configuration usable and that a restore without the Keystore key leaves the credential empty, and record the residual-risk reasoning for a rooted or instrumented device
 
