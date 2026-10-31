@@ -3,6 +3,37 @@ description: Investigation is required before making a decision or implementatio
 title: "[Research]: "
 labels: ["research", "needs-triage"]
 body:
+  - type: textarea
+    id: task_number
+    attributes:
+      label: task_number
+      description: Task number from Project Management System
+    validations:
+      required: false
+
+  - type: textarea
+    id: project
+    attributes:
+      label: project
+      description: Project name from Project Management System
+    validations:
+      required: false
+
+  - type: textarea
+    id: is_blocker
+    attributes:
+      label: is_blocker
+      description: Is this issue are blocker for another
+    validations:
+      required: false
+
+  - type: textarea
+    id: blocked_by
+    attributes:
+      label: blocked_by
+      description: Which issue blocks
+    validations:
+      required: false
   - type: markdown
     attributes:
       value: |
@@ -14,7 +45,7 @@ body:
     attributes:
       label: Question / What needs to be researched
       description: Clearly formulate the question that needs to be answered
-      placeholder: For example: Which approach is better for... / Should we switch to... / How does... work
+      placeholder: For example Which approach is better for... / Should we switch to... / How does... work
     validations:
       required: true
 
