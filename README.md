@@ -7,6 +7,11 @@ practice items into decks by skill, run short sessions where an AI coach picks
 what to practise next, and track your due count, accuracy, and streak. Everything
 works with no network connection.
 
+## Current version
+
+`0.3.0-alpha` — see the [releases](https://github.com/hIMEI29A/spaco/releases)
+page for the download.
+
 ## Requirements
 
 - **JDK 17** (required by AGP 9.5.0)

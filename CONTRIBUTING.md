@@ -47,7 +47,7 @@ Example: `Generated with OpenCode`
 
 ## Releases
 
-- Create a release by opening a Pull Request from `dev` → `master`.
+- Create a release by opening a Pull Request from `dev` → `main`.
 
 - On the merge commit of that PR, create a tag in the format `vX.Y.Z-alpha`.
 
