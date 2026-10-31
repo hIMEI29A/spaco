@@ -2,7 +2,9 @@ package com.spaco.app.core.data.repository
 
 import com.spaco.app.core.data.prefs.DataStoreActiveDeckStore
 import com.spaco.app.core.data.repository.ProgressRepositoryImpl
+import com.spaco.app.core.data.security.EncryptedCoachConfigurationStore
 import com.spaco.app.core.domain.repository.ActiveDeckStore
+import com.spaco.app.core.domain.repository.CoachConfigurationStore
 import com.spaco.app.core.domain.repository.DeckRepository
 import com.spaco.app.core.domain.repository.ItemRepository
 import com.spaco.app.core.domain.repository.ProgressRepository
@@ -46,6 +48,12 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindActiveDeckStore(impl: DataStoreActiveDeckStore): ActiveDeckStore
+
+    @Binds
+    @Singleton
+    abstract fun bindCoachConfigurationStore(
+        impl: EncryptedCoachConfigurationStore,
+    ): CoachConfigurationStore
 
     @Binds
     @Singleton

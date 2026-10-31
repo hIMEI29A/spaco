@@ -1,7 +1,8 @@
 package com.spaco.app.core.data.coach
 
-import com.spaco.app.BuildConfig
 import com.spaco.app.core.domain.coach.CoachAgent
+import com.spaco.app.core.domain.coach.CoachConnectionProbe
+import com.spaco.app.core.domain.repository.CoachConfigurationStore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -13,10 +14,11 @@ import javax.inject.Singleton
  * Binds the coach port to its implementation.
  *
  * Nothing outside this file knows whether coaching is remote: the session,
- * review recording, and scheduling go through the port either way. When the
- * build configures a remote coach (see `local.properties`), the chain is
- * remote-first with the offline coach as the fallback; otherwise the offline
- * coach is the only implementation, exactly as before.
+ * review recording, and scheduling go through the port either way. The remote
+ * coach is now selected at request time from the configuration the learner saved
+ * on the device ([CoachConfigurationStore]) — nothing is compiled in — and the
+ * built-in offline coach answers whenever no configuration is saved or the
+ * configured endpoint has no usable answer.
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -32,23 +34,17 @@ object CoachModule {
 
     @Provides
     @Singleton
-    fun provideCoachAgent(): CoachAgent {
-        val config = LlmCoachConfig.from(
-            baseUrl = BuildConfig.LLM_BASE_URL,
-            model = BuildConfig.LLM_MODEL,
-            bearer = BuildConfig.LLM_API_KEY,
-        )
-
-        return TimeoutCoachAgent(
-            delegate = if (config == null) {
-                DeterministicCoachAgent()
-            } else {
-                FailoverCoachAgent(
-                    primary = LlmCoachAgent(config),
-                    fallback = DeterministicCoachAgent(),
-                )
-            },
+    fun provideCoachAgent(configurationStore: CoachConfigurationStore): CoachAgent =
+        TimeoutCoachAgent(
+            delegate = RuntimeConfiguredCoachAgent(
+                configurationStore = configurationStore,
+                offline = DeterministicCoachAgent(),
+                remoteFactory = { configuration -> LlmCoachAgent(configuration) },
+            ),
             timeout = COACH_TIMEOUT,
         )
-    }
+
+    @Provides
+    @Singleton
+    fun provideCoachConnectionProbe(): CoachConnectionProbe = HttpCoachConnectionProbe()
 }

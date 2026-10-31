@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Cloud backup rules for Android 11 and below.
+
+    The coach configuration file holds the encrypted credential. It is excluded
+    from backup so a restore onto another device or installation never carries
+    it; the Keystore key that could decrypt it is not backed up either, so the
+    exclusion keeps backup from shipping a useless, still-secret blob.
+-->
+<full-backup-content>
+    <exclude
+        domain="file"
+        path="coach_configuration.enc" />
+</full-backup-content>

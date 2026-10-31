@@ -7,6 +7,7 @@ import com.spaco.app.core.domain.coach.ExerciseRequest
 import com.spaco.app.core.domain.coach.ExplanationRequest
 import com.spaco.app.core.domain.coach.GeneratedExercise
 import com.spaco.app.core.domain.coach.GeneratedExplanation
+import com.spaco.app.core.domain.model.CoachConfiguration
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
@@ -35,11 +36,13 @@ import kotlinx.serialization.json.put
  * opinion". Callers already treat that as the normal path, so a failing model
  * degrades to stored content instead of interrupting a session.
  *
- * The credential travels only in the `Authorization` header; it is never logged,
- * embedded in a message, or sent anywhere else.
+ * The credential, when the configuration has one, travels only in the
+ * `Authorization` header; it is never logged, embedded in a message, or sent
+ * anywhere else. An endpoint that needs no credential is supported: no
+ * authorization value is sent at all.
  */
 class LlmCoachAgent(
-    private val config: LlmCoachConfig,
+    private val config: CoachConfiguration,
     private val connectTimeoutMillis: Int = DEFAULT_CONNECT_TIMEOUT_MS,
     private val readTimeoutMillis: Int = DEFAULT_READ_TIMEOUT_MS,
     /** Bound on the whole call, including parsing; see design D6. */
@@ -115,13 +118,9 @@ class LlmCoachAgent(
             })
         }.toString()
 
-        val connection = (URL(config.chatCompletionsUrl).openConnection() as HttpURLConnection).apply {
-            requestMethod = "POST"
-            connectTimeout = connectTimeoutMillis
-            readTimeout = readTimeoutMillis
-            doOutput = true
+        val connection = openConnection().apply {
             setRequestProperty("Content-Type", "application/json")
-            setRequestProperty("Authorization", "Bearer ${config.bearer}")
+            config.credential?.let { setRequestProperty("Authorization", "Bearer $it") }
         }
 
         return try {
@@ -144,6 +143,20 @@ class LlmCoachAgent(
             connection.disconnect()
         }
     }
+
+    /**
+     * Opens the chat-completions connection. The endpoint is the server root, so
+     * a trailing slash is tolerated and the path is appended.
+     */
+    private fun openConnection(): HttpURLConnection =
+        (URL(config.endpoint.trimEnd('/') + CHAT_COMPLETIONS_PATH).openConnection() as HttpURLConnection)
+            .apply {
+                requestMethod = "POST"
+                connectTimeout = connectTimeoutMillis
+                readTimeout = readTimeoutMillis
+                doOutput = true
+            }
+
 
     private fun message(role: String, content: String): JsonObject = buildJsonObject {
         put("role", role)
@@ -224,6 +237,9 @@ class LlmCoachAgent(
     companion object {
         const val DEFAULT_CONNECT_TIMEOUT_MS = 3_000
         const val DEFAULT_READ_TIMEOUT_MS = 5_000
+
+        /** Appended to the configured endpoint, which is the server root. */
+        const val CHAT_COMPLETIONS_PATH = "/v1/chat/completions"
 
         /** Longer than the transport timeouts, so it bounds the whole call. */
         val DEFAULT_OVERALL_TIMEOUT: Duration = Duration.ofSeconds(6)
