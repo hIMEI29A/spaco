@@ -20,6 +20,7 @@
 - [x] 3.2 Add the settings UI: endpoint, model, masked credential, Save, Clear, with test tags; verify Compose tests show that a saved credential value is never displayed and that replace and delete both work
 - [x] 3.3 Add "check connection" as a bounded probe of the saved endpoint that reports an authentication failure explicitly; verify a test with a 401 response reports a rejected credential and that the message contains no credential value
 - [x] 3.4 Extend the remote-coach documentation with the settings flow — where the configuration is entered, what each state means, and what "check connection" reports; verify the documented steps match the implemented labels and test tags
+- [x] 3.5 Permit cleartext only for loopback and emulator-host endpoints, so the credential-less local endpoint from the spec is actually reachable; verify an instrumented test reaches a local endpoint over HTTP while cleartext stays denied elsewhere
 
 ## 4. Artifact and backup hardening
 
@@ -30,8 +31,8 @@
 
 - [x] 5.1 Run `./gradlew --offline test lint`; verify BUILD SUCCESSFUL with zero test failures and no new lint errors
 - [x] 5.2 Run `:app:connectedDebugAndroidTest` on the API 36 AVD with a default install; verify all instrumented tests pass
-- [ ] 5.3 Manual end-to-end on the emulator: an unconfigured install completes a session offline without a coaching request; a saved credential-less local endpoint serves a session remotely; clearing the configuration returns to the offline path; verify each observation by hand and record the results
-- [ ] 5.4 Confirm the credential survives an app restart but not a restore onto a clean install: verify a restart keeps the saved configuration usable and that a restore without the Keystore key leaves the credential empty, and record the residual-risk reasoning for a rooted or instrumented device
+- [x] 5.3 Manual end-to-end on the emulator: an unconfigured install completes a session offline without a coaching request; a saved credential-less local endpoint serves a session remotely; clearing the configuration returns to the offline path; verify each observation by hand and record the results
+- [x] 5.4 Confirm the credential survives an app restart but not a restore onto a clean install: verify a restart keeps the saved configuration usable and that a restore without the Keystore key leaves the credential empty, and record the residual-risk reasoning for a rooted or instrumented device
 
 ## Workflow follow-up
 
