@@ -123,7 +123,9 @@ exercise, and explain an answer. Behaviour notes:
 - A fresh install has nothing configured and makes no network request until you
   save a configuration.
 - An endpoint that needs no credential is a valid configuration: leave the
-  credential empty and no authorization value is sent.
+  credential empty and no authorization value is sent. A local server reached over
+  cleartext HTTP must be `localhost`, `127.0.0.1`, or `10.0.2.2` (the emulator's
+  host); any other endpoint must use HTTPS.
 - **Check connection** probes the endpoint once and tells you when it rejected the
   credential, so a wrong or missing credential shows up where you set it rather
   than silently failing every request.

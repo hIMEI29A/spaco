@@ -63,6 +63,10 @@ Credential  sk-...                    optional; sent as the Authorization bearer
   is never displayed again after saving, and never exists in a built artifact.
 - An installed app with no configuration behaves exactly like the offline app and
   makes no network request.
+- A credential-less local endpoint is reached over cleartext only if it is
+  `localhost`, `127.0.0.1`, or `10.0.2.2` (the emulator's host alias, useful with
+  `adb reverse tcp:<port> tcp:<port>`); any other endpoint must use HTTPS. The
+  allow-list is `app/src/main/res/xml/network_security_config.xml`.
 
 Confirm that an artifact carries no coach configuration (the command prints
 nothing when the artifact is clean):

@@ -88,6 +88,14 @@ configured endpoint and reports an authentication failure in the settings screen
 misconfiguration becomes visible where it is made instead of failing silently per request, and
 sessions keep being served by the fallback meanwhile.
 
+Local endpoints are commonly reached over cleartext HTTP, which Android blocks by default
+(targetSdk 28+). A `network_security_config.xml` keeps the secure default for the internet
+(`cleartextTrafficPermitted="false"`) and permits cleartext only for `localhost`, `127.0.0.1`,
+and the emulator host alias `10.0.2.2` — the names documented for a local server, an `adb
+reverse`-forwarded proxy, and the emulator's host. A local endpoint on any other host must use
+HTTPS or be listed in that config; opening cleartext globally was rejected as disproportionate
+for a security change.
+
 ### D4. At-rest protection: platform keystore + AES-GCM, no new dependency
 
 The credential is encrypted with AES-GCM under a key generated in the Android Keystore (alias
