@@ -4,6 +4,10 @@
 ## Related Issue
 <!-- Укажите номер issue, который закрывает этот PR (например: Closes #123) -->
 
+## Related task
+
+## Project
+
 ## Type of change
 - [ ] Bug fix
 - [ ] New feature
@@ -17,9 +21,6 @@
 
 ## How to test
 <!-- Как проверить, что всё работает -->
-
-## Screenshots (if applicable)
-<!-- Добавьте скриншоты, если есть визуальные изменения -->
 
 ## Checklist
 - [ ] Code follows the project style guidelines
