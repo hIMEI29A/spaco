@@ -41,23 +41,34 @@ The wrapper downloads Gradle 9.8.2 on first use, so no system Gradle is needed.
 
 ### Remote coach configuration
 
-`local.properties` is read for three optional settings, which the build turns
-into `BuildConfig` fields:
+The remote coach is configured **on the device**, not at build time: nothing in
+the build reads `local.properties`, and no endpoint, model, or credential is
+compiled into the APK.
 
-```properties
-LLM_BASE_URL=https://api.openai.com   # server root; /v1/chat/completions is appended
-LLM_MODEL=gpt-4o-mini
-LLM_API_KEY=sk-...                    # Authorization bearer value
+In the running app, open *Settings → AI coach* and enter:
+
+```text
+Endpoint    https://api.openai.com    server root; /v1/chat/completions is appended
+Model       gpt-4o-mini
+Credential  sk-...                    optional; sent as the Authorization bearer value
 ```
 
-`local.properties` is gitignored, and a checkout without the file (or with any of
-the three keys missing or blank) builds normally and uses the built-in offline
-coach, making no network request. All three are required together; the app
-compiles the key into the APK, so use this for local debug builds only and never
-publish a release built with it. Confirm what a build actually embedded:
+- **Save** applies the configuration to the running app immediately.
+- **Check connection** makes one bounded request and reports an authentication
+  failure if the endpoint rejected the credential.
+- **Clear** removes the saved configuration and returns the app to the offline
+  coach.
+- The credential is stored encrypted under a key held in the Android Keystore —
+  the ciphertext lives in the app's private files and is excluded from backup —
+  is never displayed again after saving, and never exists in a built artifact.
+- An installed app with no configuration behaves exactly like the offline app and
+  makes no network request.
+
+Confirm that an artifact carries no coach configuration (the command prints
+nothing when the artifact is clean):
 
 ```bash
-grep LLM_ app/build/generated/source/buildConfig/debug/com/spaco/app/BuildConfig.java
+unzip -p app/build/outputs/apk/debug/app-debug.apk classes.dex | strings | grep LLM_ || true
 ```
 
 ## 4. Emulator

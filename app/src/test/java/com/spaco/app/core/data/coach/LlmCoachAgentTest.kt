@@ -5,6 +5,7 @@ import com.spaco.app.core.domain.coach.CoachCandidate
 import com.spaco.app.core.domain.coach.CoachSelectionRequest
 import com.spaco.app.core.domain.coach.ExerciseRequest
 import com.spaco.app.core.domain.coach.ExplanationRequest
+import com.spaco.app.core.domain.model.CoachConfiguration
 import com.spaco.app.core.domain.model.Grade
 import com.spaco.app.core.domain.model.ItemSchedule
 import com.spaco.app.core.domain.model.LearningState
@@ -186,10 +187,10 @@ class LlmCoachAgentTest {
     @Test
     fun `an unreachable endpoint is answered with no opinion`() = runBlocking {
         val unreachable = LlmCoachAgent(
-            config = LlmCoachConfig(
-                baseUrl = "http://127.0.0.1:1",
+            config = CoachConfiguration(
+                endpoint = "http://127.0.0.1:1",
                 model = "test-model",
-                bearer = "test-bearer-value",
+                credential = "test-bearer-value",
             ),
             onFailure = { failures += it },
         )
@@ -255,6 +256,51 @@ class LlmCoachAgentTest {
         }
         assertThat(diagnostics).isNotEmpty()
         assertThat(diagnostics.joinToString("\n")).doesNotContain("test-bearer-value")
+    }
+
+    // --- endpoint and credential shape -----------------------------------
+
+    @Test
+    fun `the endpoint is the server root plus the chat completions path`() = runBlocking<Unit> {
+        endpoint.respondWith(content = """{"targetItemId":"item-a"}""")
+
+        agent().selectNextItem(selectionRequest())
+
+        assertThat(endpoint.requests.single().path).isEqualTo("/v1/chat/completions")
+    }
+
+    @Test
+    fun `a trailing slash in the endpoint is tolerated`() = runBlocking<Unit> {
+        endpoint.respondWith(content = """{"targetItemId":"item-a"}""")
+        val trailing = LlmCoachAgent(
+            config = CoachConfiguration(
+                endpoint = "${endpoint.config.endpoint}/",
+                model = endpoint.config.model,
+                credential = "test-bearer-value",
+            ),
+        )
+
+        trailing.selectNextItem(selectionRequest())
+
+        assertThat(endpoint.requests.single().path).isEqualTo("/v1/chat/completions")
+    }
+
+    @Test
+    fun `an endpoint without a credential is sent no authorization value`() = runBlocking<Unit> {
+        endpoint.respondWith(content = """{"targetItemId":"item-a"}""")
+        val noCredential = LlmCoachAgent(
+            config = CoachConfiguration(
+                endpoint = endpoint.config.endpoint,
+                model = endpoint.config.model,
+                credential = null,
+            ),
+        )
+
+        assertThat(noCredential.selectNextItem(selectionRequest())?.targetItemId).isEqualTo("item-a")
+
+        val request = endpoint.requests.single()
+        assertThat(request.authorization).isNull()
+        assertThat(request.body).doesNotContain("Authorization")
     }
 
     // --- helpers ---------------------------------------------------------
@@ -332,11 +378,11 @@ private class FakeEndpoint : AutoCloseable {
     private var status: Int = 200
     private var content: String = "{}"
 
-    val config: LlmCoachConfig
-        get() = LlmCoachConfig(
-            baseUrl = "http://127.0.0.1:${server.address.port}",
+    val config: CoachConfiguration
+        get() = CoachConfiguration(
+            endpoint = "http://127.0.0.1:${server.address.port}",
             model = "test-model",
-            bearer = "test-bearer-value",
+            credential = "test-bearer-value",
         )
 
     init {

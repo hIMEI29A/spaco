@@ -101,33 +101,40 @@ Notes:
   proper signing config.
 - Since the app is offline by default and text-only, after installing it works
   with no network and stores everything on the device. See *Remote coach* below
-  for the one build-time option that changes that.
+  for the optional setting that changes that.
 
 ## Remote coach (optional)
 
-Practice is served by a built-in offline coach unless three settings are
-present in `local.properties` (never committed, per-machine):
+Practice is served by a built-in offline coach until you configure a remote one
+**in the app**: open *Settings → AI coach* and enter the endpoint, a model, and —
+only if your endpoint asks for one — a credential. Saving applies immediately: no
+rebuild, no reinstall.
 
-```properties
-LLM_BASE_URL=https://api.openai.com      # server root, not the full path
-LLM_MODEL=gpt-4o-mini
-LLM_API_KEY=sk-...                       # sent as the Authorization bearer value
+```text
+Endpoint    https://api.openai.com    server root, not the full path
+Model       gpt-4o-mini
+Credential  sk-...                    optional; sent as the Authorization bearer value
 ```
 
 The app then asks that OpenAI-compatible endpoint (`POST
-{LLM_BASE_URL}/v1/chat/completions`) to choose what to practise, generate an
+{endpoint}/v1/chat/completions`) to choose what to practise, generate an
 exercise, and explain an answer. Behaviour notes:
 
-- Leave all three out (or blank) and nothing changes: the app behaves exactly as
-  it does offline and makes no network request at all. A partially filled set is
-  treated the same way — all three are required.
+- A fresh install has nothing configured and makes no network request until you
+  save a configuration.
+- An endpoint that needs no credential is a valid configuration: leave the
+  credential empty and no authorization value is sent.
+- **Check connection** probes the endpoint once and tells you when it rejected the
+  credential, so a wrong or missing credential shows up where you set it rather
+  than silently failing every request.
+- The credential is stored encrypted under a key held in the Android Keystore,
+  is excluded from device backups, is never shown back to you after saving, and
+  is never part of the APK. It exists only on the device where you entered it;
+  **Clear** removes it and returns the app to the offline coach.
 - Whenever the endpoint is unreachable, slow, or returns something unusable, the
   request is answered by the built-in coach and the session continues.
 - Grading feedback is shown before the explanation arrives, so a slow model
   never delays the verdict.
-- The credential is compiled into the APK, so configure it for local debug
-  builds only and never publish a release built with it. Rotate the key if such
-  an APK leaks.
 - Only the content a request needs leaves the device: the item's prompt and
   expected answer, sibling answers used as distractors, scheduling state, and
   recent review outcomes.
