@@ -4,14 +4,17 @@
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!--
-        Only used by the remote coach, and only when local.properties configures
-        one: an unconfigured build makes no network request at all.
+        Only used by the remote coach, and only when the learner saves a coach
+        configuration in Settings: a fresh install makes no network request at all.
     -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".SpaCoApplication"
         android:allowBackup="true"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.SpaCo">
